@@ -17,6 +17,7 @@ router.get("/registered_students", async function (req, res)
         console.log({listOfRegisteredStudentJoinResults});
 
         res.send(listOfRegisteredStudentJoinResults);
+
     }
     catch (err)
     {
@@ -38,6 +39,33 @@ router.get("/registered_students", async function (req, res)
 router.post("/add_student_to_class", async function (req, res)
 {
     // TODO: implement this route
+    try
+    {
+        const studentId = req.body.studentId;
+        const classId = req.body.classId;
+
+
+        console.log("studentId =   " + studentId);
+        console.log("classId =  " + classId);
+
+
+        if(classId === undefined){
+            res.status(400).json({"error": "bad request: expected parameter 'classId' is not defined"});
+            return;
+        }
+        if(studentId === undefined){
+            res.status(400).json({"error": "bad request: expected parameter 'studentId' is not defined"});
+            return;
+        }
+        await db.addStudentToClass(studentId, classId);
+        res.status(204).send();
+    }
+
+    catch (err)
+    {
+        console.error("Error:", err.message);
+        res.status(500).json({"error": "Internal Server Error"});
+    }
 });
 
 
