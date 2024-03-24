@@ -1,6 +1,7 @@
 let express = require('express');
 let router = express.Router();
 const db = require("./../db");
+const {updateExistingStudentInformation} = require("../db");
 
 
 /**
@@ -144,6 +145,51 @@ router.post("/students", async function (req, res)
 router.put("/students/:id", async function (req, res)
 {
     // TODO: implement this route or the PATCH route below
+    try {
+        const id = req.params.id;
+        const firstName = req.body.firstName;
+        const lastName = req.body.lastName;
+        const birthDate = new Date(req.body.birthDate).toISOString().split('T')[0].trim();
+
+        console.log("firsName        = " + firstName);
+        console.log("lastName       = " + lastName);
+        console.log("birthDate = " + birthDate);
+
+        if (firstName === undefined) {
+            res.status(400).json({"error": "bad request: expected parameter 'firstName' is not defined"});
+            return;
+        }
+        if (lastName === undefined) {
+            res.status(400).json({"error": "bad request: expected parameter 'lastName' is not defined"});
+            return;
+        }
+        if (birthDate === undefined) {
+            res.status(400).json({"error": "bad request: expected parameter 'birthDate' is not defined"});
+            return;
+        }
+
+        let studentToUpdate = {
+            id: id,
+            firstName: firstName,
+            lastName: lastName,
+            birthDate: birthDate
+        };
+        studentToUpdate = await updateExistingStudentInformation(studentToUpdate);
+
+        if (studentToUpdate == null) {
+            console.log("No student with id " + id + " exists.");
+
+            // return 404 status code (i.e., error that the class was not found)
+            res.status(404).json({"error": "failed to update the student with id = " + id + " in the database because it does not exist"});
+            return;
+        }
+        res.status(200).json(studentToUpdate);
+    }
+    catch (err)
+    {
+        console.error("Error:", err.message);
+        res.status(422).json({"error": "failed to update student in the database"});
+    }
 });
 
 
