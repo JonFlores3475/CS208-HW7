@@ -17,7 +17,6 @@ router.get("/registered_students", async function (req, res)
         console.log({listOfRegisteredStudentJoinResults});
 
         res.send(listOfRegisteredStudentJoinResults);
-
     }
     catch (err)
     {
@@ -25,6 +24,8 @@ router.get("/registered_students", async function (req, res)
         res.status(500).json({"error": "Internal Server Error"});
     }
 });
+
+
 
 
 /**
@@ -84,6 +85,48 @@ router.post("/add_student_to_class", async function (req, res)
 router.delete("/drop_student_from_class", async function (req, res)
 {
     // TODO: implement this route
+    try
+    {
+        const studentId = req.body.studentId;
+        const classId = req.body.classId;
+
+
+        console.log("studentId =   " + studentId);
+        console.log("classId =  " + classId);
+
+
+        if(classId === undefined){
+            res.status(400).json({"error": "bad request: expected parameter 'classId' is not defined"});
+            return;
+        }
+        if(studentId === undefined){
+            res.status(400).json({"error": "bad request: expected parameter 'studentId' is not defined"});
+            return;
+        }
+
+        let studentToDrop = await getStudentWithId(studentId);
+        let classToDrop = await getClassWithId(classId);
+
+        if(studentToDrop === null){
+            console.log("No student with studentId = " + studentId + " exists.");
+            res.status(404).json({"error": "failed to drop the student with id = " + id + " from the database because it does not exist"});
+            return;
+        }
+        if(classToDrop === null){
+            console.log("No class with classId = " + classId + " exists.");
+            res.status(404).json({"error": "failed to drop the class with id = " + id + " from the database because it does not exist"});
+            return;
+        }
+
+        await db.dropAnExistingStudentFromAClass(studentId, classId);
+        res.status(204).send();
+    }
+
+    catch (err)
+    {
+        console.error("Error:", err.message);
+        res.status(500).json({"error": "Internal Server Error"});
+    }
 });
 
 

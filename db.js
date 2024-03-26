@@ -516,7 +516,14 @@ function getAllRegisteredStudents()
         db.serialize(function()
         {
             const sql =
-                `TODO: replace me with actual query`;
+                `SELECT students.id,
+                        students.first_name || ' ' || students.last_name AS student_full_name,
+                        classes.code,
+                        classes.title
+                FROM students
+                INNER JOIN registered_students ON students.id = registered_students.student_id
+                INNER JOIN classes ON classes.id = registered_students.class_id
+                ORDER BY students.last_name, students.first_name, classes.code;`;
 
             let listOfRegisteredStudentJoinResults = [];
 
@@ -604,7 +611,8 @@ function dropAnExistingStudentFromAClass(studentId, classId)
         db.serialize(function()
         {
             const sql =
-                `TODO: replace me with actual query`;
+                `DELETE FROM registered_students
+                WHERE student_id = ? and class_id = ?;`;
 
             function callbackAfterReturnedRowIsProcessed(err, row)
             {
